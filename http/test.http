@@ -8,3 +8,8 @@ Content-Type: application/x-www-form-urlencoded
 name=1234
 
 ###
+
+GET http://localhost:8880/ebook/list?name=Mysql
+Accept: application/json
+
+###

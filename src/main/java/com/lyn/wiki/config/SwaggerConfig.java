@@ -45,7 +45,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder()
                 .title("接口文档")
                 .description("接口文档")
-                .contact(new Contact("liuchenglei", "http://localhost:8880/doc.html", "xxxx@xxxx.com"))
+                .contact(new Contact("Mr.Liu", "http://localhost:8880/doc.html", "xxxx@xxxx.com"))
                 .version("1.0")
                 .build();
     }
