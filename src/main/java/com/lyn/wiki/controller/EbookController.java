@@ -9,6 +9,7 @@ import com.lyn.wiki.resp.CommonResp;
 import com.lyn.wiki.resp.EbookResp;
 import com.lyn.wiki.util.CopyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +34,9 @@ public class EbookController {
     public CommonResp list(EbookReq ebookReq){
         CommonResp<List<EbookResp>> resp = new CommonResp();
         QueryWrapper<Ebook> wrapper = new QueryWrapper();
-        wrapper.like("name",ebookReq.getName());
+        if(!ObjectUtils.isEmpty(ebookReq.getName())){
+            wrapper.like("name",ebookReq.getName());
+        }
         List<Ebook> ebookList = ebookMapper.selectList(wrapper);
         List<EbookResp> respList = CopyUtil.copyList(ebookList, EbookResp.class);
         resp.setContent(respList);

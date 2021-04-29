@@ -1,30 +1,47 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view/>
+    <a-layout id="components-layout-demo-top-side-2">
+        <TheHeader/>
+        <router-view/>
+        <TheFooter/>
+    </a-layout>
 </template>
+<script lang="ts">
+    import {defineComponent, ref} from 'vue';
+    import TheHeader from '@/components/TheHeader.vue';
+    import TheFooter from '@/components/TheFooter.vue';
+
+    export default defineComponent({
+        name:'app',
+        components: {
+            TheHeader,
+            TheFooter,
+        },
+        setup() {
+            return {
+                selectedKeys1: ref<string[]>(['2']),
+                selectedKeys2: ref<string[]>(['1']),
+                collapsed: ref<boolean>(false),
+                openKeys: ref<string[]>(['sub1']),
+            };
+        },
+    });
+</script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+    #components-layout-demo-top-side-2 .logo {
+        float: left;
+        width: 120px;
+        height: 31px;
+        margin: 16px 24px 16px 0;
+        background: rgba(255, 255, 255, 0.3);
+    }
 
-#nav {
-  padding: 30px;
-}
+    /*.ant-row-rtl #components-layout-demo-top-side-2 .logo {*/
+    /*    float: right;*/
+    /*    margin: 16px 0 16px 24px;*/
+    /*}*/
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
-}
+    /*.site-layout-background {*/
+    /*    background: #fff;*/
+    /*}*/
 </style>
