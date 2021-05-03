@@ -24,6 +24,8 @@ public class EbookQueryReq extends PageReq implements Serializable {
 
     @ApiModelProperty(value = "id")
     private Long id;
+    @ApiModelProperty(value = "子目录下的电子书")
+    private Long categoryId2;
 
     @ApiModelProperty(value = "名称")
     private String name;

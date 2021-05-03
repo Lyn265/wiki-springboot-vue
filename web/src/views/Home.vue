@@ -4,7 +4,11 @@
       <a-menu
               mode="inline"
               :style="{ height: '100%', borderRight: 0 }"
+              @click="handleClick"
       >
+        <a-menu-item key="welcome">
+          <span><user-outlined />欢迎</span>
+        </a-menu-item>
         <a-sub-menu v-for="item in level1" :key="item.id">
           <template v-slot:title>
             <span><user-outlined />{{item.name}}</span>
@@ -23,7 +27,10 @@
               :style="{ background: '#fff', padding: '24px',
               margin: 0, minHeight: '280px' }"
       >
-        <a-list item-layout="vertical" size="large" :grid="{gutter:20,column:3}" :data-source="eBooks">
+        <div class="welcome" v-show="isShowWelcome">
+          <h1>欢迎来到我的电子书网站</h1>
+        </div>
+        <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{gutter:20,column:3}" :data-source="eBooks">
           <template #renderItem="{ item }">
             <a-list-item key="item.name">
               <template #actions>
@@ -61,9 +68,10 @@ export default defineComponent({
   },
   setup(){
     const level1 = ref();
-    let categorys:any=[];
     const eBooks = ref();//ref:响应式数据
-
+    const isShowWelcome = ref<boolean>(true);
+    let categorys:any=[];
+    let categoryId2 = 0;
     const handleCategoryQuery = () => {
       //查询数据之前先清空 避免保存新数据后还显示老数据
       axios.get("/category/all").then((response) => {
@@ -72,17 +80,30 @@ export default defineComponent({
         level1.value = Tool.array2Tree(categorys,0);
       });
     };
-    onMounted(() =>{
-      handleCategoryQuery();
+    const queryEbookbyCategory = () =>{
       axios.get("/ebook/list",{
         params:{
           page:1,
-          size:1000
+          size:1000,
+          categoryId2,
         }
       }).then(resp =>{
         const data = resp.data;
         eBooks.value = data.content.list;
       });
+    };
+    const handleClick = (val:any) =>{
+      if(val.key ==='welcome'){
+        isShowWelcome.value = true;
+      }else{
+        categoryId2 = val.key;
+        isShowWelcome.value = false;
+        queryEbookbyCategory();
+      }
+      // isShowWelcome.value = val === 'welcome';
+    };
+    onMounted(() =>{
+      handleCategoryQuery();
     });
     const actions: Record<string, string>[] = [
       { type: 'StarOutlined', text: '156' },
@@ -93,6 +114,8 @@ export default defineComponent({
       eBooks,
       actions,
       level1,
+      isShowWelcome,
+      handleClick,
       collapsed: ref<boolean>(false),
     }
   }

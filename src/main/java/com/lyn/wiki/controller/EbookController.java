@@ -2,7 +2,6 @@ package com.lyn.wiki.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lyn.wiki.domain.Ebook;
 import com.lyn.wiki.mapper.EbookMapper;
@@ -52,7 +51,10 @@ public class EbookController {
         if(!ObjectUtils.isEmpty(ebookQueryReq.getName())){
             wrapper.like("name", ebookQueryReq.getName());
         }
-        IPage<Ebook> ebookPage = new Page<>(ebookQueryReq.getPage(), ebookQueryReq.getSize());
+        if(!ObjectUtils.isEmpty(ebookQueryReq.getCategoryId2())){
+            wrapper.eq("category2_id",ebookQueryReq.getCategoryId2());
+        }
+        Page<Ebook> ebookPage = new Page<>(ebookQueryReq.getPage(), ebookQueryReq.getSize());
         ebookPage = ebookMapper.selectPage(ebookPage, wrapper);
         List<Ebook> ebookList = ebookPage.getRecords();
         PageResp pageResp = new PageResp<Ebook>();
