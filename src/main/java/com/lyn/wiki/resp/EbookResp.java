@@ -20,10 +20,10 @@ public class EbookResp {
     private String name;
 
     @ApiModelProperty(value = "分类1")
-    private Long category1_id;
+    private Long category1Id;
 
     @ApiModelProperty(value = "分类2")
-    private Long category2_id;
+    private Long category2Id;
 
     @ApiModelProperty(value = "描述")
     private String description;
@@ -32,11 +32,11 @@ public class EbookResp {
     private String cover;
 
     @ApiModelProperty(value = "文档数")
-    private Integer doc_count;
+    private Integer docCount;
 
     @ApiModelProperty(value = "阅读数")
-    private Integer view_count;
+    private Integer viewCount;
 
     @ApiModelProperty(value = "点赞数")
-    private Integer vote_count;
+    private Integer voteCount;
 }

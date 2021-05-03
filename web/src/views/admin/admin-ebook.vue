@@ -37,9 +37,9 @@
         <template #cover="{ text: cover }">
           <img v-if="cover" :src="cover" alt="avatar" />
         </template>
-<!--        <template v-slot:category="{ text, record }">-->
-<!--          <span>{{ getCategoryName(record.category1Id) }}/{{ getCategoryName(record.category2Id) }}</span>-->
-<!--        </template>-->
+        <template v-slot:category="{ text, record }">
+          <span>{{ getCategoryName(record.category1Id) }}/{{ getCategoryName(record.category2Id) }}</span>
+        </template>
         <template v-slot:action="{ text, record }">
           <a-space size="small">
             <a-button type="primary" @click="edit(record)">
@@ -71,15 +71,20 @@
       <a-form-item label="封面">
         <a-input v-model:value="ebook.cover"/>
       </a-form-item>
+      <a-form-item label="分类">
+        <a-cascader v-model:value="categoryIds" :options="level1" placeholder="Please select"
+        :field-names="{label: 'name', value: 'id', children: 'children'}"
+        />
+      </a-form-item>
       <a-form-item label="描述">
         <a-input v-model:value="ebook.description" />
       </a-form-item>
-      <a-form-item label="目录1">
-        <a-input v-model:value="ebook.category1_id" />
-      </a-form-item>
-      <a-form-item label="目录2">
-        <a-input v-model:value="ebook.category2_id" />
-      </a-form-item>
+<!--      <a-form-item label="目录1">-->
+<!--        <a-input v-model:value="ebook.category1Id" />-->
+<!--      </a-form-item>-->
+<!--      <a-form-item label="目录2">-->
+<!--        <a-input v-model:value="ebook.category2Id" />-->
+<!--      </a-form-item>-->
     </a-form>
   </a-modal>
 </template>
@@ -87,11 +92,15 @@
   import { defineComponent,ref,onMounted } from 'vue';
   import {message} from "ant-design-vue";
   import axios from 'axios';
+  import {Tool} from "@/utils/tool";
 
     export default defineComponent({
         name: "AdminEbook",
       setup(){
-        const ebook = ref({});
+        let categorys:any=[];
+        const categoryIds = ref();
+        const level1 = ref();
+        const ebook = ref();
         const modalText = ref<string>('Content of the modal');
         const modelVisible = ref<boolean>(false);
         const modelLoading = ref<boolean>(false);
@@ -118,7 +127,7 @@
           },
           {
             title: '分类',
-            slots: { customRender: 'category' }
+            slots: {customRender: 'category'}
           },
           {
             title: '文档数',
@@ -143,24 +152,25 @@
          * 表单相关
          *
          **/
+
+        //编辑
         const edit =(record:any) =>{
-          const temp = {...record};
-          // const temp = Object.assign({},record);
           modelVisible.value = true;
+          const temp = Object.assign({},record);
           ebook.value = temp;
+          categoryIds.value = [ebook.value.category1Id,ebook.value.category2Id];
+
         };
         const add =() =>{
           modelVisible.value = true;
           ebook.value = {};
         };
-
+        //[前端开发/Vue] [000/100]
         const handleOk = () => {
           // modalText.value = 'The modal will be closed after two seconds';
-          // modelLoading.value = true;
-          // setTimeout(() => {
-          //   modelVisible.value = false;
-          //   modelLoading.value = false;
-          // }, 2000);
+          modelLoading.value = true;
+          ebook.value.category1Id = categoryIds.value[0];
+          ebook.value.category2Id = categoryIds.value[1];
           axios.post("/ebook/save",ebook.value).then((response) => {
             loading.value = false;
             modelLoading.value = false;
@@ -178,6 +188,16 @@
             }
           });
 
+        };
+        //获取目录名字
+        const getCategoryName = (cid:any) =>{
+          let result = '';
+            categorys.forEach((item:any) =>{
+              if(item.id === cid){
+                result = item.name;
+              }
+            });
+          return result;
         };
         const handleDelete = (id:number) =>{
           axios.delete("/ebook/delete/"+id).then((resp) =>{
@@ -221,6 +241,21 @@
           });
         };
         /**
+         * 查询目录
+         */
+        const handleQueryCategory = () =>{
+          axios.get("/category/all").then((response) => {
+            loading.value = false;
+            categorys = response.data;
+            level1.value = [];
+            level1.value = Tool.array2Tree(categorys,0);
+            handleQuery({
+              page: pagination.value.current,
+              size: pagination.value.pageSize
+            });
+          });
+        };
+        /**
          * 表格点击页码时触发
          */
         const handleTableChange = (pagination: any) => {
@@ -231,10 +266,7 @@
           });
         };
         onMounted(() =>{
-           handleQuery({
-            page: pagination.value.current,
-            size: pagination.value.pageSize
-          });
+          handleQueryCategory();
         });
         return {
           param,
@@ -246,13 +278,16 @@
           modelVisible,
           modelLoading,
           ebook,
+          level1,
+          categoryIds,
+
+          getCategoryName,
           handleTableChange,
           handleQuery,
+          handleQueryCategory,
           handleDelete,
-
           edit,
           add,
-
           handleOk
 
         };

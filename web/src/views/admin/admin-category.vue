@@ -23,7 +23,7 @@
       <a-table
               :columns="columns"
               :row-key="record => record.id"
-              :data-source="categorys"
+              :data-source="level1"
               :loading="loading"
               :pagination="false"
       >
@@ -60,9 +60,16 @@
     <a-form :model="category" :label-col="{span:6}" :wrapper-col="{span:18}">
       <a-form-item label="名称">
         <a-input v-model:value="category.name" />
+
       </a-form-item>
       <a-form-item label="父分类">
-        <a-input v-model:value="category.parent"/>
+<!--        <a-input v-model:value="category.parent"/>-->
+        <a-select
+                v-model:value="category.parent"
+                ref="select"
+        >
+          <a-select-option :value="c.id" v-for="c in level1" :key="c.id" :disabled="c.id===category.id">{{c.name}}</a-select-option>
+        </a-select>
       </a-form-item>
       <a-form-item label="顺序">
         <a-input v-model:value="category.sort"/>
@@ -74,8 +81,9 @@
   import { defineComponent,ref,onMounted } from 'vue';
   import {message} from "ant-design-vue";
   import axios from 'axios';
+  import {Tool} from "@/utils/tool";
 
-    export default defineComponent({
+  export default defineComponent({
         name: "AdminCategory",
       setup(){
         const category = ref({});
@@ -84,7 +92,8 @@
         const modelLoading = ref<boolean>(false);
         const param = ref();
         param.value = {};
-        const categorys = ref();
+        // const categorys = ref();
+        const level1 = ref();
         const loading = ref(false);
         const columns = [
           {
@@ -159,11 +168,11 @@
         const handleQuery = () => {
           loading.value = true;
           //查询数据之前先清空 避免保存新数据后还显示老数据
-          categorys.value=[];
           axios.get("/category/all").then((response) => {
             loading.value = false;
             const data = response.data;
-            categorys.value = data;
+            level1.value = [];
+            level1.value = Tool.array2Tree(data,0);
             // if (data.success){
             //   categorys.value = data.content;
             // }
@@ -178,7 +187,7 @@
         });
         return {
           param,
-          categorys,
+          level1,
           columns,
           loading,
           modalText,
