@@ -83,7 +83,6 @@
   import { StarOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
   import axios from 'axios';
 
-
 export default defineComponent({
   name: 'Home',
   components: {
@@ -92,16 +91,18 @@ export default defineComponent({
     MessageOutlined,
   },
 
-
   setup(){
-    console.log('setup start');
 
     const eBooks = ref();//ref:响应式数据
     onMounted(() =>{
-      axios.get("/ebook/list").then(resp =>{
+      axios.get("/ebook/list",{
+        params:{
+          page:1,
+          size:1000
+        }
+      }).then(resp =>{
         const data = resp.data;
-        eBooks.value = data.content;
-        console.log(data);
+        eBooks.value = data.content.list;
       });
     });
     const actions: Record<string, string>[] = [
@@ -111,7 +112,11 @@ export default defineComponent({
     ];
     return{
       eBooks,
-      actions
+      actions,
+      selectedKeys1: ref<string[]>(['2']),
+      selectedKeys2: ref<string[]>(['1']),
+      collapsed: ref<boolean>(false),
+      openKeys: ref<string[]>(['sub1'])
     }
   }
 });
@@ -124,5 +129,4 @@ export default defineComponent({
     border-radius: 8%;
     margin:5px 0;
   }
-
 </style>

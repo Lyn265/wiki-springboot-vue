@@ -2,6 +2,7 @@ package com.lyn.wiki.service;
 
 import com.lyn.wiki.domain.Ebook;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lyn.wiki.req.EbookSaveReq;
 
 /**
  * <p>
@@ -13,4 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IEbookService extends IService<Ebook> {
 
+    int saveEbook(EbookSaveReq ebook);
+
+    int delEbook(Long id);
 }

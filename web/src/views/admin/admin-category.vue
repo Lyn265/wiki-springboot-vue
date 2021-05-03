@@ -7,13 +7,9 @@
                 layout="inline"
                 :model="param">
           <a-form-item>
-            <a-input v-model:value="param.name" placeholder="名称">
-            </a-input>
-          </a-form-item>
-          <a-form-item>
             <a-button
                     type="primary"
-                    @click="handleQuery({page:1,size:pagination.pageSize})">
+                    @click="handleQuery()">
               查询
             </a-button>
           </a-form-item>
@@ -22,17 +18,14 @@
               新增
             </a-button>
           </a-form-item>
-
         </a-form>
       </p>
-
       <a-table
               :columns="columns"
               :row-key="record => record.id"
-              :data-source="ebooks"
-              :pagination="pagination"
+              :data-source="categorys"
               :loading="loading"
-              @change="handleTableChange"
+              :pagination="false"
       >
         <template #cover="{ text: cover }">
           <img v-if="cover" :src="cover" alt="avatar" />
@@ -60,25 +53,19 @@
     </a-layout-content>
   </a-layout>
   <a-modal
-          title="电子书表单"
+          title="目录表单"
           v-model:visible="modelVisible"
           :confirm-loading="modelLoading"
           @ok="handleOk">
-    <a-form :model="ebook" :label-col="{span:6}" :wrapper-col="{span:18}">
+    <a-form :model="category" :label-col="{span:6}" :wrapper-col="{span:18}">
       <a-form-item label="名称">
-        <a-input v-model:value="ebook.name" />
+        <a-input v-model:value="category.name" />
       </a-form-item>
-      <a-form-item label="封面">
-        <a-input v-model:value="ebook.cover"/>
+      <a-form-item label="父分类">
+        <a-input v-model:value="category.parent"/>
       </a-form-item>
-      <a-form-item label="描述">
-        <a-input v-model:value="ebook.description" />
-      </a-form-item>
-      <a-form-item label="目录1">
-        <a-input v-model:value="ebook.category1_id" />
-      </a-form-item>
-      <a-form-item label="目录2">
-        <a-input v-model:value="ebook.category2_id" />
+      <a-form-item label="顺序">
+        <a-input v-model:value="category.sort"/>
       </a-form-item>
     </a-form>
   </a-modal>
@@ -89,48 +76,28 @@
   import axios from 'axios';
 
     export default defineComponent({
-        name: "AdminEbook",
+        name: "AdminCategory",
       setup(){
-        const ebook = ref({});
+        const category = ref({});
         const modalText = ref<string>('Content of the modal');
         const modelVisible = ref<boolean>(false);
         const modelLoading = ref<boolean>(false);
         const param = ref();
         param.value = {};
-        const ebooks = ref();
-        const pagination = ref(
-                {
-                  current:1,
-                  pageSize:5,
-                  total:0
-                }
-        );
+        const categorys = ref();
         const loading = ref(false);
         const columns = [
-          {
-            title: '封面',
-            dataIndex: 'cover',
-            slots: { customRender: 'cover' }
-          },
           {
             title: '名称',
             dataIndex: 'name'
           },
           {
-            title: '分类',
-            slots: { customRender: 'category' }
+            title: '父分类',
+           dataIndex: 'parent'
           },
           {
-            title: '文档数',
-            dataIndex: 'docCount'
-          },
-          {
-            title: '阅读数',
-            dataIndex: 'viewCount'
-          },
-          {
-            title: '点赞数',
-            dataIndex: 'voteCount'
+            title: '顺序',
+            dataIndex: 'sort'
           },
           {
             title: 'Action',
@@ -144,14 +111,13 @@
          *
          **/
         const edit =(record:any) =>{
-          const temp = {...record};
-          // const temp = Object.assign({},record);
+          const temp = Object.assign({},record);
           modelVisible.value = true;
-          ebook.value = temp;
+          category.value = temp;
         };
         const add =() =>{
           modelVisible.value = true;
-          ebook.value = {};
+          category.value = {};
         };
 
         const handleOk = () => {
@@ -161,17 +127,14 @@
           //   modelVisible.value = false;
           //   modelLoading.value = false;
           // }, 2000);
-          axios.post("/ebook/save",ebook.value).then((response) => {
+          axios.post("/category/save",category.value).then((response) => {
             loading.value = false;
             modelLoading.value = false;
             const data = response.data;
             if (data.success){
                 modelVisible.value = false;
                 message.info("更新成功");
-              handleQuery({
-                page:pagination.value.current,
-                size:5
-              });
+              handleQuery();
               // 刷新页面
             } else {
               message.error(data.message);
@@ -180,14 +143,11 @@
 
         };
         const handleDelete = (id:number) =>{
-          axios.delete("/ebook/delete/"+id).then((resp) =>{
+          axios.delete("/category/delete/"+id).then((resp) =>{
             const data = resp.data;
             if(data.success){
               message.info(data.message);
-              handleQuery({
-                page:pagination.value.current,
-                size:5
-              });
+              handleQuery();
             }else{
               message.error(data.message);
             }
@@ -196,64 +156,42 @@
         /**
          * 数据查询
          **/
-        const handleQuery = (params: any) => {
+        const handleQuery = () => {
           loading.value = true;
           //查询数据之前先清空 避免保存新数据后还显示老数据
-          ebooks.value=[];
-          axios.get("/ebook/list",{
-            params:{
-              page:params.page,
-              size:params.size,
-              name:param.value.name
-            }
-          }).then((response) => {
+          categorys.value=[];
+          axios.get("/category/all").then((response) => {
             loading.value = false;
             const data = response.data;
-            if (data.success){
-              ebooks.value = data.content.list;
-              // 重置分页按钮
-              pagination.value.current = params.page;
-              pagination.value.total = data.content.total;
-            }
-            else {
-              message.error(data.message);
-            }
+            categorys.value = data;
+            // if (data.success){
+            //   categorys.value = data.content;
+            // }
+            // else {
+            //   message.error(data.message);
+            // }
           });
         };
-        /**
-         * 表格点击页码时触发
-         */
-        const handleTableChange = (pagination: any) => {
-          console.log("看看自带的分页参数都有啥：" + JSON.stringify(pagination));
-          handleQuery({
-            page: pagination.current,
-            size: pagination.pageSize
-          });
-        };
+
         onMounted(() =>{
-           handleQuery({
-            page: pagination.value.current,
-            size: pagination.value.pageSize
-          });
+           handleQuery();
         });
         return {
           param,
-          ebooks,
+          categorys,
           columns,
-          pagination,
           loading,
           modalText,
           modelVisible,
           modelLoading,
-          ebook,
-          handleTableChange,
+          category,
+
           handleQuery,
           handleDelete,
-
+          handleOk,
           edit,
           add,
 
-          handleOk
 
         };
       },
