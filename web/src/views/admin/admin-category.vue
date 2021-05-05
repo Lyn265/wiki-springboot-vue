@@ -167,6 +167,7 @@
          **/
         const handleQuery = () => {
           loading.value = true;
+          level1.value = [];
           //查询数据之前先清空 避免保存新数据后还显示老数据
           axios.get("/category/all").then((response) => {
             loading.value = false;

@@ -10,6 +10,14 @@ export class Tool {
         }
     }
 
+    public static copy(obj:object){
+        if(!Tool.isEmpty(obj)){
+            return JSON.parse(JSON.stringify(obj));
+        }
+    }
+
+
+
     // [{
     //   id:'',
     //   name:'',

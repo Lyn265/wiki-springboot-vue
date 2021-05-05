@@ -130,7 +130,7 @@ public class CodeGenerator {
         //数据库表映射到实体的命名策略
         strategy.setNaming(NamingStrategy.underline_to_camel);
         //数据库表字段映射到实体的命名策略
-        strategy.setColumnNaming(NamingStrategy.no_change);
+        strategy.setColumnNaming(NamingStrategy.underline_to_camel);
         //strategy.setSuperEntityClass("你自己的父类实体,没有就不用设置!");
         //lombok模型
         strategy.setEntityLombokModel(true);
