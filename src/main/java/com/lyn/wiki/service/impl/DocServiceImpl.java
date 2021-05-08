@@ -52,7 +52,7 @@ public class DocServiceImpl extends ServiceImpl<DocMapper, Doc> implements IDocS
 
         }else{
             int update1 = docMapper.updateById(doc);
-            int update2 = contentMapper.updateById(content);
+            int update2 = contentMapper.insertOrUpdate(content);
             return update1 + update2;
         }
     }

@@ -47,13 +47,15 @@ public class DocController {
      * @return
      */
     @GetMapping("/all/{ebookId}")
-    public List<DocResp> all(@PathVariable Long ebookId){
+    public CommonResp all(@PathVariable Long ebookId){
+        CommonResp commonResp = new CommonResp();
         QueryWrapper<Doc> wrapper = new QueryWrapper();
         wrapper.eq("ebook_id",ebookId);
         wrapper.orderByAsc("sort");
         List<Doc> categories = docMapper.selectList(wrapper);
         List<DocResp> respList = CopyUtil.copyList(categories, DocResp.class);
-        return respList;
+        commonResp.setContent(respList);
+        return commonResp;
     }
     @GetMapping("/list")
     public CommonResp list(DocQueryReq docQueryReq){
@@ -74,7 +76,7 @@ public class DocController {
     public CommonResp saveDoc(@Valid @RequestBody DocSaveReq saveDoc){
         CommonResp commonResp = new CommonResp();
         int result = docService.saveDoc(saveDoc);
-        if(result == 2){
+        if(result > 1){
             return commonResp;
         }else{
             commonResp.setSuccess(false);

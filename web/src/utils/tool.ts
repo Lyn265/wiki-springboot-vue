@@ -10,11 +10,16 @@ export class Tool {
         }
     }
 
+    public static isNotEmpty(obj:any){
+        return !this.isEmpty(obj);
+    }
+
     public static copy(obj:object){
         if(!Tool.isEmpty(obj)){
             return JSON.parse(JSON.stringify(obj));
         }
     }
+
 
 
 

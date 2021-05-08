@@ -96,13 +96,26 @@
                         <a-input v-model:value="doc.sort"/>
                     </a-form-item>
                     <a-form-item>
+                        <a-button type="primary" @click="handlePreviewContent()">
+                        在线预览
+                        </a-button>
+                    </a-form-item>
+                    <a-form-item>
                         <!--        <a-input v-model:value="doc.sort"/>-->
                         <div id="content"></div>
                     </a-form-item>
                 </a-form>
             </a-col>
         </a-row>
-
+        <a-drawer
+                width="900"
+                placement="right"
+                :closable="false"
+                :visible="drawerVisible"
+                @close="onClose"
+        >
+            <div class="wangeditor" :innerHTML="previewHtml"></div>
+        </a-drawer>
     </a-layout-content>
   </a-layout>
 <!--  <a-modal-->
@@ -134,14 +147,16 @@
         treeSelectData.value=[];
         const param = ref();
         param.value = {};
-        //const docs = ref();
+        const docs = ref();
         const route  = useRoute();
         const level1 = ref();
         level1.value = [];
         let ids:Array<string> = [];
         let docNames:Array<string> = [];
         const loading = ref(false);
+        const previewHtml = ref();
         editor.config.zIndex = 0;
+        const  drawerVisible = ref<boolean>(false);
         const columns = [
           {
             title: '名称',
@@ -267,7 +282,7 @@
           //复制level1到treeSelectData,并添加 '无' 这个节点
         };
         //电子书保存（包括富文本）
-        const handleSave = () => {
+          const handleSave = () => {
           doc.value.content = editor.txt.html();
           axios.post("/doc/save",doc.value).then((response) => {
             loading.value = false;
@@ -302,16 +317,16 @@
           axios.get("/doc/all/"+route.query.ebookId).then((response) => {
             loading.value = false;
             const data = response.data;
-            level1.value = [];
-            level1.value = Tool.array2Tree(data,0);
-            treeSelectData.value = Tool.copy(level1.value) || [];
-            treeSelectData.value.unshift({id:0,name:'无'});
-            // if (data.success){
-            //   docs.value = data.content;
-            // }
-            // else {
-            //   message.error(data.message);
-            // }
+            if (data.success){
+                level1.value = [];
+                level1.value = Tool.array2Tree(data.content,0);
+                treeSelectData.value = Tool.copy(level1.value) || [];
+                treeSelectData.value.unshift({id:0,name:'无'});
+              docs.value = data.content;
+            }
+            else {
+              message.error("获取电子书失败。");
+            }
           });
         };
           /**
@@ -328,6 +343,15 @@
                   }
               });
           };
+          const handlePreviewContent = () => {
+              const html = editor.txt.html();
+              previewHtml.value = html;
+              drawerVisible.value = true;
+          };
+
+          const onClose = () => {
+              drawerVisible.value = false;
+          };
 
         onMounted(() =>{
            handleQuery();
@@ -340,7 +364,11 @@
           columns,
           loading,
           doc,
+          drawerVisible,
+          previewHtml,
 
+          handlePreviewContent,
+          onClose,
           handleQuery,
           handleDelete,
           handleSave,

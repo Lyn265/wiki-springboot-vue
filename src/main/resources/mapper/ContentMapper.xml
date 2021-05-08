@@ -12,5 +12,16 @@
     <sql id="Base_Column_List">
         id, content
     </sql>
+    <insert id="insertOrUpdate">
+        insert into content
+        (id, content)
+        values
+            (
+            #{id},
+            #{content}
+            )
+        ON DUPLICATE KEY UPDATE
+        content=values(content)
+    </insert>
 
 </mapper>

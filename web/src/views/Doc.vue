@@ -1,6 +1,7 @@
 <template>
     <a-layout>
         <a-layout-content :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">
+            <h3 v-if="level1.length === 0">对不起，找不到相关文档！</h3>
             <a-row>
                 <a-col :span="6">
                     <a-tree
@@ -9,11 +10,12 @@
                             @select="onSelect"
                             :replaceFields="{title:'name',key:'id',value:'id'}"
                             :defaultExpandAll="true"
+                            :defaultSelectKeys ="defaultSelectKeys"
                     >
                     </a-tree>
                 </a-col>
                 <a-col :span="18">
-                    <div :innerHTML="html"></div>
+                    <div class="wangeditor" :innerHTML="html"></div>
                 </a-col>
             </a-row>
         </a-layout-content>
@@ -33,27 +35,10 @@
             const route = useRoute();
             const level1 = ref();
             level1.value = [];
-            // const docs = ref();
+            const docs = ref();
             const html = ref();
-
-            /**
-             * 电子书数据查询（根据ebookId查询）
-             **/
-            const handleQuery = () => {
-                //查询数据之前先清空 避免保存新数据后还显示老数据
-                level1.value = [];
-                axios.get("/doc/all/"+route.query.ebookId).then((response) => {
-                    const data = response.data;
-                    level1.value = [];
-                    level1.value = Tool.array2Tree(data,0);
-                    // if (data.success){
-                    //   docs.value = data.content;
-                    // }
-                    // else {
-                    //   message.error(data.message);
-                    // }
-                });
-            };
+            const defaultSelectKeys = ref();
+            defaultSelectKeys.value = [];
             const handleDocContent = (id:any) => {
                 //查询数据之前先清空 避免保存新数据后还显示老数据
                 axios.get("/doc/find-content/"+id).then((response) => {
@@ -65,8 +50,33 @@
                     }
                 });
             };
+
+            /**
+             * 电子书数据查询（根据ebookId查询）
+             **/
+            const handleQuery = () => {
+                //查询数据之前先清空 避免保存新数据后还显示老数据
+                level1.value = [];
+                axios.get("/doc/all/"+route.query.ebookId).then((response) => {
+                    const data = response.data;
+                    if (data.success){
+                        docs.value = data.content;
+                        level1.value = [];
+                        level1.value = Tool.array2Tree(docs.value,0);
+                        console.log(level1)
+                        if(Tool.isNotEmpty(level1.value)){
+                            defaultSelectKeys.value = [level1.value[0].id];
+                            handleDocContent(level1.value[0].id);
+                        }
+                    }
+                    else {
+                      message.error("获取电子书失败。");
+                    }
+
+                });
+            };
             const onSelect =(selectedKeys:any,info:any) =>{
-                console.log("selectedKeys:"+selectedKeys,info);
+                console.log(info);
                 handleDocContent(selectedKeys[0]);
             };
             onMounted(() =>{
@@ -75,7 +85,8 @@
             return{
                 level1,
                 html,
-                onSelect
+                onSelect,
+                defaultSelectKeys
             }
         },
 
@@ -83,5 +94,54 @@
 </script>
 
 <style scoped>
+    .wangeditor table {
+        border-top: 1px solid #ccc;
+        border-left: 1px solid #ccc;
+    }
+    .wangeditor table td,
+    .wangeditor table th {
+        border-bottom: 1px solid #ccc;
+        border-right: 1px solid #ccc;
+        padding: 3px 5px;
+    }
+    .wangeditor table th {
+        border-bottom: 2px solid #ccc;
+        text-align: center;
+    }
 
+    /* blockquote 样式 */
+    .wangeditor blockquote {
+        display: block;
+        border-left: 8px solid #d0e5f2;
+        padding: 5px 10px;
+        margin: 10px 0;
+        line-height: 1.4;
+        font-size: 100%;
+        background-color: #f1f1f1;
+    }
+
+    /* code 样式 */
+    .wangeditor code {
+        display: inline-block;
+        *display: inline;
+        *zoom: 1;
+        background-color: #f1f1f1;
+        border-radius: 3px;
+        padding: 3px 5px;
+        margin: 0 3px;
+    }
+    .wangeditor pre code {
+        display: block;
+    }
+
+    /* ul ol 样式 */
+    .wangeditor ul, ol {
+        margin: 10px 0 10px 20px;
+    }
+    .wangeditor blockquote, p {
+        font-family: "YouYuan";
+        margin: 20px 10px !important;
+        font-size: 16px !important;
+        font-weight: 600;
+    }
 </style>
