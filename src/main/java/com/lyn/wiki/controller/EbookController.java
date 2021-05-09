@@ -70,11 +70,10 @@ public class EbookController {
         int result = ebookService.saveEbook(saveEbook);
         if(result == 1){
             return commonResp;
-        }else{
+        }
             commonResp.setSuccess(false);
             commonResp.setMessage("更新失败");
             return commonResp;
-        }
     }
     @DeleteMapping("/delete/{id}")
     public CommonResp delEbook(@PathVariable Long id){
@@ -83,11 +82,10 @@ public class EbookController {
         if(result == 1){
             commonResp.setMessage("删除成功。");
             return commonResp;
-        }else{
+        }
             commonResp.setSuccess(false);
             commonResp.setMessage("删除失败。");
             return commonResp;
-        }
     }
 
 }

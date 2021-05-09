@@ -22,7 +22,6 @@
               新增
             </a-button>
           </a-form-item>
-
         </a-form>
       </p>
 
@@ -36,6 +35,9 @@
       >
         <template v-slot:action="{ text, record }">
           <a-space size="small">
+            <a-button type="primary" @click="resetPwdEdit(record)">
+              重置密码
+            </a-button>
             <a-button type="primary" @click="edit(record)">
               编辑
             </a-button>
@@ -65,7 +67,18 @@
       <a-form-item label="昵称">
         <a-input v-model:value="user.name"/>
       </a-form-item>
-      <a-form-item label="密码">
+      <a-form-item label="密码" v-show="!user.id">
+        <a-input v-model:value="user.password" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
+  <a-modal
+          title="修改密码表单"
+          v-model:visible="resetPwdModelVisible"
+          :confirm-loading="resetPwdModelLoading"
+          @ok="resetPwdHandleOk">
+    <a-form :model="user" :label-col="{span:6}" :wrapper-col="{span:18}">
+      <a-form-item label="新密码">
         <a-input v-model:value="user.password" />
       </a-form-item>
     </a-form>
@@ -77,14 +90,20 @@
   import axios from 'axios';
   import {Tool} from "@/utils/tool";
 
+  declare let hexMd5:any;
+  declare let KEY:any;
+
     export default defineComponent({
         name: "AdminUser",
       setup(){
         const level1 = ref();
         const user = ref();
+        user.value = [];
         const modalText = ref<string>('Content of the modal');
         const modelVisible = ref<boolean>(false);
         const modelLoading = ref<boolean>(false);
+        const resetPwdModelVisible = ref<boolean>(false);
+        const resetPwdModelLoading = ref<boolean>(false);
         const param = ref();
         param.value = {};
         const users = ref();
@@ -127,8 +146,8 @@
           modelVisible.value = true;
           const temp = Object.assign({},record);
           user.value = temp;
-
         };
+
         const add =() =>{
           modelVisible.value = true;
           user.value = {};
@@ -137,8 +156,8 @@
         const handleOk = () => {
           // modalText.value = 'The modal will be closed after two seconds';
           modelLoading.value = true;
+          user.value.password = hexMd5(user.value.password + KEY);
           axios.post("/user/save",user.value).then((response) => {
-            loading.value = false;
             modelLoading.value = false;
             const data = response.data;
             if (data.success){
@@ -168,6 +187,36 @@
               message.error(data.message);
             }
           })
+        };
+        /**
+         * 重置密码表单相关
+         *
+         **/
+        const resetPwdEdit =(record:any) =>{
+            resetPwdModelVisible.value = true;
+            const temp = Object.assign({},record);
+            temp.password = null;
+            user.value = temp;
+          };
+
+        const resetPwdHandleOk = () =>{
+          resetPwdModelLoading.value = true;
+          user.value.password = hexMd5(user.value.password + KEY);
+          axios.post("/user/reset-password",user.value).then((response) => {
+            resetPwdModelLoading.value = false;
+            const data = response.data;
+            if (data.success){
+              resetPwdModelVisible.value = false;
+              message.info("更新成功");
+              handleQuery({
+                page:pagination.value.current,
+                size:5
+              });
+              // 刷新页面
+            } else {
+              message.error(data.message);
+            }
+          });
         };
         /**
          * 数据查询
@@ -227,7 +276,12 @@
           handleDelete,
           edit,
           add,
-          handleOk
+          handleOk,
+
+          resetPwdEdit,
+          resetPwdModelVisible,
+          resetPwdModelLoading,
+          resetPwdHandleOk
 
         };
       },

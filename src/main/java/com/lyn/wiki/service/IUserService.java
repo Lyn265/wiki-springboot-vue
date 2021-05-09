@@ -2,7 +2,10 @@ package com.lyn.wiki.service;
 
 import com.lyn.wiki.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.lyn.wiki.req.RestPasswordReq;
+import com.lyn.wiki.req.UserLoginReq;
 import com.lyn.wiki.req.UserSaveReq;
+import com.lyn.wiki.resp.UserLoginResp;
 
 /**
  * <p>
@@ -17,4 +20,8 @@ public interface IUserService extends IService<User> {
     int saveUser(UserSaveReq user);
 
     int delUser(Long id);
+
+    int resetPassword(RestPasswordReq passwordReq);
+
+    UserLoginResp login(UserLoginReq req);
 }

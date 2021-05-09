@@ -78,11 +78,10 @@ public class DocController {
         int result = docService.saveDoc(saveDoc);
         if(result > 1){
             return commonResp;
-        }else{
+        }
             commonResp.setSuccess(false);
             commonResp.setMessage("更新失败");
             return commonResp;
-        }
     }
     @DeleteMapping("/delete/{ids}")
     public CommonResp delDoc(@PathVariable String ids){
@@ -91,11 +90,10 @@ public class DocController {
         if(result > 0){
             commonResp.setMessage("删除成功。");
             return commonResp;
-        }else{
+        }
             commonResp.setSuccess(false);
             commonResp.setMessage("删除失败。");
             return commonResp;
-        }
     }
 
     @GetMapping("/find-content/{id}")

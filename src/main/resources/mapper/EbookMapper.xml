@@ -6,13 +6,13 @@
     <resultMap id="BaseResultMap" type="com.lyn.wiki.domain.Ebook">
         <id column="id" property="id" />
         <result column="name" property="name" />
-        <result column="category1_id" property="category1_id" />
-        <result column="category2_id" property="category2_id" />
+        <result column="category1_id" property="category1Id" />
+        <result column="category2_id" property="category2Id" />
         <result column="description" property="description" />
         <result column="cover" property="cover" />
-        <result column="doc_count" property="doc_count" />
-        <result column="view_count" property="view_count" />
-        <result column="vote_count" property="vote_count" />
+        <result column="doc_count" property="docCount" />
+        <result column="view_count" property="viewCount" />
+        <result column="vote_count" property="voteCount" />
     </resultMap>
 
     <!-- 通用查询结果列 -->

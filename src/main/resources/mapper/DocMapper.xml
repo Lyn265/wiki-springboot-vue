@@ -5,12 +5,12 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.lyn.wiki.domain.Doc">
         <id column="id" property="id" />
-        <result column="ebook_id" property="ebook_id" />
+        <result column="ebook_id" property="ebookId" />
         <result column="parent" property="parent" />
         <result column="name" property="name" />
         <result column="sort" property="sort" />
-        <result column="view_count" property="view_count" />
-        <result column="vote_count" property="vote_count" />
+        <result column="view_count" property="viewCount" />
+        <result column="vote_count" property="voteCount" />
     </resultMap>
 
     <!-- 通用查询结果列 -->

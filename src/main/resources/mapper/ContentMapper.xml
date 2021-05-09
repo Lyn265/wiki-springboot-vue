@@ -14,7 +14,10 @@
     </sql>
     <insert id="insertOrUpdate">
         insert into content
-        (id, content)
+            (
+            id,
+            content
+            )
         values
             (
             #{id},

@@ -25,7 +25,6 @@
 
         </a-form>
       </p>
-
       <a-table
               :columns="columns"
               :row-key="record => record.id"

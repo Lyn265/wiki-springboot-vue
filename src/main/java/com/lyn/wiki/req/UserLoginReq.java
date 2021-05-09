@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 
@@ -20,21 +20,17 @@ import java.io.Serializable;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @ApiModel(value="用户对象", description="用户信息")
-public class UserSaveReq implements Serializable {
+public class UserLoginReq implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    @ApiModelProperty(value = "ID")
-    private Long id;
-    @NotNull(message = "【用户名】不能为空")
+    @NotEmpty(message = "【用户名】不能为空")
     @ApiModelProperty(value = "登陆名")
     private String loginName;
-    @NotNull(message = "【昵称】不能为空")
-    @ApiModelProperty(value = "昵称")
-    private String name;
-    @NotNull(message = "【密码】不能为空")
+
+    @NotEmpty(message = "【密码】不能为空")
     // @Length(min = 6, max = 20, message = "【密码】6~20位")
-    @Pattern(regexp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,32}$", message = "【密码】至少包含 数字和英文，长度6-32")
+    @Pattern(regexp = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,32}$", message = "【密码】校验规则不正确")
     @ApiModelProperty(value = "密码")
     private String password;
 

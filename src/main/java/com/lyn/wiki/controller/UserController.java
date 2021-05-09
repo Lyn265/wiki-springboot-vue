@@ -5,14 +5,18 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lyn.wiki.domain.User;
 import com.lyn.wiki.mapper.UserMapper;
+import com.lyn.wiki.req.RestPasswordReq;
+import com.lyn.wiki.req.UserLoginReq;
 import com.lyn.wiki.req.UserQueryReq;
 import com.lyn.wiki.req.UserSaveReq;
 import com.lyn.wiki.resp.CommonResp;
+import com.lyn.wiki.resp.UserLoginResp;
 import com.lyn.wiki.resp.UserResp;
 import com.lyn.wiki.resp.PageResp;
 import com.lyn.wiki.service.IUserService;
 import com.lyn.wiki.util.CopyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,14 +65,14 @@ public class UserController {
     @PostMapping("/save")
     public CommonResp saveUser(@Valid @RequestBody UserSaveReq userSaveReq){
         CommonResp commonResp = new CommonResp();
+        userSaveReq.setPassword(DigestUtils.md5DigestAsHex(userSaveReq.getPassword().getBytes()));
         int result = userService.saveUser(userSaveReq);
         if(result == 1){
             return commonResp;
-        }else{
+        }
             commonResp.setSuccess(false);
             commonResp.setMessage("更新失败");
             return commonResp;
-        }
     }
     @DeleteMapping("/delete/{id}")
     public CommonResp delUser(@PathVariable Long id){
@@ -77,10 +81,40 @@ public class UserController {
         if(result == 1){
             commonResp.setMessage("删除成功。");
             return commonResp;
-        }else{
+        }
             commonResp.setSuccess(false);
             commonResp.setMessage("删除失败。");
             return commonResp;
+    }
+
+    /**
+     * 重置密码
+     * @param passwordReq
+     * @return
+     */
+    @PostMapping("/reset-password")
+    public CommonResp resetPassword(@Valid @RequestBody RestPasswordReq passwordReq){
+           CommonResp commonResp = new CommonResp();
+        passwordReq.setPassword(DigestUtils.md5DigestAsHex(passwordReq.getPassword().getBytes()));
+        int result = userService.resetPassword(passwordReq);
+        if (result == 1){
+            return commonResp;
         }
+            commonResp.setSuccess(false);
+            commonResp.setMessage("更新失败");
+            return commonResp;
+    }
+    /**
+     * 登录
+     * @param req
+     * @return
+     */
+    @PostMapping("/login")
+    public CommonResp login(@Valid @RequestBody UserLoginReq req){
+        CommonResp commonResp = new CommonResp();
+        req.setPassword(DigestUtils.md5DigestAsHex(req.getPassword().getBytes()));
+        UserLoginResp loginResp = userService.login(req);
+        commonResp.setContent(loginResp);
+        return commonResp;
     }
 }
