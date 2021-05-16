@@ -5,7 +5,6 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -23,7 +22,16 @@ public class UserLoginResp implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    @ApiModelProperty(value = "ID")
+    private Long id;
+
     @ApiModelProperty(value = "登陆名")
     private String loginName;
+
+    @ApiModelProperty(value = "昵称")
+    private String name;
+
+    @ApiModelProperty(value = "令牌")
+    private String token;
 
 }

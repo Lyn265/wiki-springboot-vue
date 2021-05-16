@@ -3,6 +3,8 @@ package com.lyn.wiki.aspect;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.spring.PropertyPreFilters;
+import com.lyn.wiki.util.RequestContext;
+import com.lyn.wiki.util.SnowFlake;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
@@ -12,6 +14,8 @@ import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -25,6 +29,12 @@ import javax.servlet.http.HttpServletRequest;
 @Component
 public class LogAspect {
 
+    @Autowired
+    RequestContext requestContext;
+
+    @Autowired
+    SnowFlake snowFlake;
+
     private final static Logger LOG = LoggerFactory.getLogger(LogAspect.class);
 
     /** 定义一个切点 */
@@ -35,7 +45,7 @@ public class LogAspect {
     @Before("controllerPointcut()")
     public void doBefore(JoinPoint joinPoint) throws Throwable {
 
-
+        MDC.put("LOG_ID",String.valueOf(snowFlake.nextId()));
         // 开始打印请求日志
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
@@ -48,6 +58,7 @@ public class LogAspect {
         LOG.info("类名方法: {}.{}", signature.getDeclaringTypeName(), name);
         LOG.info("远程地址: {}", request.getRemoteAddr());
 
+        requestContext.setIp(getRemoteIp(request));
 
         // 打印请求参数
         Object[] args = joinPoint.getArgs();

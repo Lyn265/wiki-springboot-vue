@@ -16,6 +16,7 @@ import com.lyn.wiki.resp.PageResp;
 import com.lyn.wiki.service.IUserService;
 import com.lyn.wiki.util.CopyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -39,6 +40,9 @@ public class UserController {
 
     @Autowired
     IUserService userService;
+
+    @Autowired
+    RedisTemplate redisTemplate;
 
     /**
      * 电子书查询
@@ -115,6 +119,17 @@ public class UserController {
         req.setPassword(DigestUtils.md5DigestAsHex(req.getPassword().getBytes()));
         UserLoginResp loginResp = userService.login(req);
         commonResp.setContent(loginResp);
+        return commonResp;
+    }
+    /**
+     * 退出登录
+     * @param token
+     * @return
+     */
+    @GetMapping("/logout/{token}")
+    public CommonResp logout(@PathVariable String token){
+        CommonResp commonResp = new CommonResp();
+        redisTemplate.delete(token);
         return commonResp;
     }
 }

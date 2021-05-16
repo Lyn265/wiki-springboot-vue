@@ -2,6 +2,7 @@ package com.lyn.wiki.mapper;
 
 import com.lyn.wiki.domain.Doc;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * <p>
@@ -13,4 +14,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface DocMapper extends BaseMapper<Doc> {
 
+    void increaseViewCount(@Param("id") Long id);
+
+    void increaseVoteCount(@Param("id") Long id);
+
+    void updateEbookInfo();
 }

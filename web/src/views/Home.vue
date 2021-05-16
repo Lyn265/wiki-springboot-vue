@@ -28,15 +28,15 @@
               margin: 0, minHeight: '280px' }"
       >
         <div class="welcome" v-show="isShowWelcome">
-          <h1>欢迎来到我的电子书网站</h1>
+          <TheWelcome></TheWelcome>
         </div>
         <a-list v-show="!isShowWelcome" item-layout="vertical" size="large" :grid="{gutter:20,column:3}" :data-source="eBooks">
           <template #renderItem="{ item }">
             <a-list-item key="item.name">
               <template #actions>
-          <span v-for="{ type, text } in actions" :key="type">
-            <component v-bind:is="type" style="margin-right: 8px" />
-            {{ text }}
+          <span>
+            <component v-bind:is="'LikeOutlined'" style="margin-right: 8px" />
+            {{ item.voteCount }}
           </span>
               </template>
               <a-list-item-meta :description="item.description">
@@ -58,10 +58,12 @@
   import { StarOutlined, LikeOutlined, MessageOutlined } from '@ant-design/icons-vue';
   import axios from 'axios';
   import {Tool} from "@/utils/tool";
+  import TheWelcome from "@/components/TheWelcome.vue";
 
 export default defineComponent({
   name: 'Home',
   components: {
+    TheWelcome,
     StarOutlined,
     LikeOutlined,
     MessageOutlined,

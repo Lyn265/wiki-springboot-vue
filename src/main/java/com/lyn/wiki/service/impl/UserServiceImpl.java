@@ -1,5 +1,6 @@
 package com.lyn.wiki.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.lyn.wiki.domain.User;
@@ -15,8 +16,11 @@ import com.lyn.wiki.util.CopyUtil;
 import com.lyn.wiki.util.SnowFlake;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * <p>
@@ -34,6 +38,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
     @Autowired
     SnowFlake snowFlake;
+
+    @Autowired
+    RedisTemplate redisTemplate;
 
     @Override
     public int saveUser(UserSaveReq saveReq) {
@@ -73,8 +80,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         if(ObjectUtils.isEmpty(userDb)){
             throw new BusinessException(BusinessExceptionCode.USER_LOGIN_NAME_NOT_EXIST);
         }else{
-            if(userDb.getPassword().equalsIgnoreCase(userDb.getPassword())){
-                return CopyUtil.copy(userDb,UserLoginResp.class);
+            if(userDb.getPassword().equals(userDb.getPassword())){
+                //生成token
+                Long token = snowFlake.nextId();
+                String tokenKey = token.toString();
+                UserLoginResp loginResp = CopyUtil.copy(userDb, UserLoginResp.class);
+                loginResp.setToken(tokenKey);
+                //token存储到redis里
+                redisTemplate.opsForValue().set(tokenKey, JSONObject.toJSONString(loginResp),60*60, TimeUnit.SECONDS);
+                return loginResp;
             }else{
                 throw new BusinessException(BusinessExceptionCode.USER_LOGIN_NAME_NOT_EXIST);
             }

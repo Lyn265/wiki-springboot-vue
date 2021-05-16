@@ -2,6 +2,7 @@ package com.lyn.wiki.service.impl;
 
 import com.lyn.wiki.domain.Content;
 import com.lyn.wiki.mapper.ContentMapper;
+import com.lyn.wiki.mapper.DocMapper;
 import com.lyn.wiki.service.IContentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +21,15 @@ import org.springframework.util.ObjectUtils;
 public class ContentServiceImpl extends ServiceImpl<ContentMapper, Content> implements IContentService {
     @Autowired
     ContentMapper contentMapper;
+    @Autowired
+    DocMapper docMapper;
     @Override
     public String findContent(Long id) {
         Content content = contentMapper.selectById(id);
+        docMapper.increaseViewCount(id);
         if(!ObjectUtils.isEmpty(content)){
             return content.getContent();
         }
-        return null;
+        return "";
     }
 }

@@ -13,7 +13,12 @@ import com.lyn.wiki.req.DocSaveReq;
  * @since 2021-05-04
  */
 public interface IDocService extends IService<Doc> {
+
     int saveDoc(DocSaveReq doc);
 
     int delDoc(String ids);
+
+    void voteCount(Long id);
+
+    void updateEbookInfo();
 }

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lyn.wiki.mapper.EbookSnapshotMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.lyn.wiki.domain.EbookSnapshot">
+        <id column="id" property="id" />
+        <result column="ebook_id" property="ebookId" />
+        <result column="date" property="date" />
+        <result column="view_count" property="viewCount" />
+        <result column="vote_count" property="voteCount" />
+        <result column="view_increase" property="viewIncrease" />
+        <result column="vote_increase" property="voteIncrease" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, ebook_id, date, view_count, vote_count, view_increase, vote_increase
+    </sql>
+
+    <update id="getSnapshot">
+    <!--当天电子快照初始化 -->
+        INSERT INTO ebook_snapshot (ebook_id, `date`, view_count, vote_count, view_increase, vote_increase)
+            SELECT
+                t1.id,
+                CURDATE(),
+                0,
+                0,
+                0,
+                0
+            FROM
+                ebook t1
+            WHERE
+                NOT EXISTS (
+                    SELECT
+                        1
+                    FROM
+                        ebook_snapshot t2
+                    WHERE
+                        t1.id = t2.ebook_id
+                        AND t2. `date` = CURDATE());
+        <!--更新当天电子书点赞数、浏览数 -->
+        update
+            ebook_snapshot t1,ebook t2
+            set t1.view_count = t2.view_count,t1.vote_count = t2.vote_count
+        where t1.ebook_id = t2.id and t1.`date`= CURDATE();
+        <!--计算当天点赞增长数、浏览增长数 -->
+        update
+            ebook_snapshot t1
+            LEFT JOIN (select * from ebook_snapshot
+                where `date` = DATE_SUB(CURDATE(),INTERVAL 1 day)) t2
+            ON t1.id = t2.id
+        set t1.view_increase = t1.view_count - IFNULL(t2.view_count,0),
+            t1.vote_increase = t1.vote_count - IFNULL(t2.vote_count,0);
+    </update>
+
+    <select id="getStatistic" resultType="com.lyn.wiki.resp.EbookSnapshotResp">
+        SELECT
+            t1. `date`,
+            SUM(t1.view_count) AS viewCount,
+            SUM(t1.vote_count) AS voteCount,
+            SUM(t1.view_increase) AS viewIncrease,
+            SUM(t1.vote_increase) AS voteIncrease
+        FROM
+            ebook_snapshot t1
+        WHERE
+            t1. `date` >= DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+        GROUP BY
+            t1. `date`
+    </select>
+    <!--获取前30天数据 -->
+    <select id="get30Statistic" resultType="com.lyn.wiki.resp.EbookSnapshotResp">
+        SELECT
+            t1. `date`,
+            SUM(t1.view_increase) AS viewIncrease,
+            SUM(t1.vote_increase) AS voteIncrease
+        FROM
+            ebook_snapshot t1
+        WHERE
+            t1. `date` BETWEEN DATE_SUB(CURDATE(), INTERVAL 30 DAY) AND DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+        GROUP BY
+            t1. `date`
+    </select>
+
+</mapper>

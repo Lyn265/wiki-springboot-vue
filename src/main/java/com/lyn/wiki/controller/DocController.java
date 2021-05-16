@@ -109,4 +109,16 @@ public class DocController {
         return resp;
     }
 
+    /**
+     * 点赞功能
+     * @param id
+     * @return
+     */
+    @GetMapping("/vote/{id}")
+    public CommonResp voteCount(@PathVariable Long id){
+        CommonResp resp = new CommonResp();
+        docService.voteCount(id);
+        return resp;
+    }
+
 }

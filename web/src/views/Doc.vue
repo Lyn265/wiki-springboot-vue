@@ -14,8 +14,21 @@
                     >
                     </a-tree>
                 </a-col>
-                <a-col :span="18">
+                <a-col :span="18" v-if="level1.length>0">
+                    <div>
+                        <h2>{{doc.name}}</h2>
+                        <div>
+                            <span>阅读数：{{doc.viewCount}}</span>&nbsp;&nbsp;
+                            <span>点赞数：{{doc.voteCount}}</span>
+                        </div>
+                        <a-divider style="height: 2px; background-color: #9999cc" />
+                    </div>
                     <div class="wangeditor" :innerHTML="html"></div>
+                    <div class="vote-div">
+                        <a-button type="primary" shape="round" size="large" @click="vote">
+                            <template #icon><LikeOutlined/>&nbsp;点赞:{{doc.voteCount}}</template>
+                        </a-button>
+                    </div>
                 </a-col>
             </a-row>
         </a-layout-content>
@@ -37,6 +50,8 @@
             level1.value = [];
             const docs = ref();
             const html = ref();
+            const doc = ref();
+            doc.value = {};
             const defaultSelectKeys = ref();
             defaultSelectKeys.value = [];
             const handleDocContent = (id:any) => {
@@ -63,10 +78,10 @@
                         docs.value = data.content;
                         level1.value = [];
                         level1.value = Tool.array2Tree(docs.value,0);
-                        console.log(level1)
                         if(Tool.isNotEmpty(level1.value)){
                             defaultSelectKeys.value = [level1.value[0].id];
                             handleDocContent(level1.value[0].id);
+                            doc.value = level1.value[0];
                         }
                     }
                     else {
@@ -75,10 +90,31 @@
 
                 });
             };
+            /**
+             * 选中当前节点
+             * @param selectedKeys
+             * @param info
+             */
             const onSelect =(selectedKeys:any,info:any) =>{
-                console.log(info);
-                handleDocContent(selectedKeys[0]);
+                if(Tool.isNotEmpty(selectedKeys)){
+                    handleDocContent(selectedKeys[0]);
+                    doc.value = info.selectedNodes[0].props;
+                }
             };
+            /**
+             * 点赞功能
+             */
+            const vote = () =>{
+                axios('/doc/vote/'+doc.value.id).then(resp =>{
+                    const data = resp.data;
+                    if(data.success){
+                        doc.value.voteCount++;
+                    }else {
+                        message.error(data.message);
+                    }
+                })
+            };
+
             onMounted(() =>{
                 handleQuery();
             });
@@ -86,7 +122,9 @@
                 level1,
                 html,
                 onSelect,
-                defaultSelectKeys
+                defaultSelectKeys,
+                doc,
+                vote
             }
         },
 
@@ -143,5 +181,9 @@
         margin: 20px 10px !important;
         font-size: 16px !important;
         font-weight: 600;
+    }
+    .vote-div{
+        text-align: center;
+        padding: 15px;
     }
 </style>
